@@ -41,21 +41,21 @@ crontab -e
 Add the following line to the crontab file:
 
 ```bash
-0 6 * * * cd /path/to/your/repo && python update_number.py
+0 12 * * * cd /path/to/your/repo && python update_number.py
 # or with LLM
-0 6 * * * cd /path/to/your/repo && FANCY_JOB_USE_LLM=true uv run python update_number.py
+0 12 * * * cd /path/to/your/repo && FANCY_JOB_USE_LLM=true uv run python update_number.py
 ```
 
-This will initially run the script at 6am the next day.
+This will initially run the script at 12pm (noon) the next day.
 
 **On Windows:**
 
 Use Windows Task Scheduler:
 1. Open Task Scheduler
-2. Create a new task that runs daily
+2. Create a new task that runs daily at 12:00 PM (noon)
 3. Set the action to run: `python C:\path\to\fancy_job_incrementer\update_number.py`
 4. Set the working directory to: `C:\path\to\fancy_job_incrementer`
-5. Choose your preferred time for the first run
+5. Enable "Run task as soon as possible after a missed start" to ensure it runs when you turn on your laptop
 
 ## Usage
 
