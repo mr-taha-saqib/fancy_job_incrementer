@@ -4,6 +4,19 @@ import subprocess
 from datetime import datetime
 import random
 
+def already_committed_today():
+    """Check if we already committed today."""
+    try:
+        result = subprocess.run(
+            ['git', 'log', '-1', '--format=%ci'],
+            capture_output=True, text=True, check=True
+        )
+        last_commit_date = result.stdout.strip()[:10]  # Get YYYY-MM-DD
+        today = datetime.now().strftime('%Y-%m-%d')
+        return last_commit_date == today
+    except subprocess.CalledProcessError:
+        return False
+
 def increment_number():
     """Read the current number, increment it, and write it back."""
     try:
@@ -71,6 +84,11 @@ def update_cron_job():
 
 def main():
     print("Starting daily number incrementer...")
+
+    # Check if we already committed today
+    if already_committed_today():
+        print("Already committed today. Skipping.")
+        return
 
     # Increment the number
     new_number = increment_number()
