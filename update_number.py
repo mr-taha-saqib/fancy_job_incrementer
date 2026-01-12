@@ -5,15 +5,17 @@ from datetime import datetime
 import random
 
 def already_committed_today():
-    """Check if we already committed today."""
+    """Check if we already committed the daily number update today."""
     try:
         result = subprocess.run(
-            ['git', 'log', '-1', '--format=%ci'],
+            ['git', 'log', '-1', '--grep=^Update number:', '--format=%ci'],
             capture_output=True, text=True, check=True
         )
-        last_commit_date = result.stdout.strip()[:10]  # Get YYYY-MM-DD
-        today = datetime.now().strftime('%Y-%m-%d')
-        return last_commit_date == today
+        if result.stdout.strip():
+            last_commit_date = result.stdout.strip()[:10]  # Get YYYY-MM-DD
+            today = datetime.now().strftime('%Y-%m-%d')
+            return last_commit_date == today
+        return False
     except subprocess.CalledProcessError:
         return False
 
