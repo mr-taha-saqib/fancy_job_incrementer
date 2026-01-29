@@ -51,13 +51,41 @@ def generate_commit_message(number):
     else:
         return f"Update number: {datetime.now().strftime('%Y-%m-%d')}"
 
+def push_pending_commits():
+    """Push any pending commits that failed to push previously."""
+    try:
+        result = subprocess.run(
+            ['git', 'rev-list', '--count', 'origin/main..HEAD'],
+            capture_output=True, text=True, check=True
+        )
+        pending_count = int(result.stdout.strip())
+        if pending_count > 0:
+            print(f"Found {pending_count} unpushed commit(s), pushing now...")
+            subprocess.run(['git', 'push'], check=True)
+            print("Successfully pushed pending commits!")
+            return True
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to push pending commits: {e}")
+        return False
+
 def git_commit_and_push(message):
     """Commit and push changes to git."""
     try:
+        push_pending_commits()
         subprocess.run(['git', 'add', 'number.txt'], check=True)
         subprocess.run(['git', 'commit', '-m', message], check=True)
-        subprocess.run(['git', 'push'], check=True)
-        print(f"Successfully committed and pushed: {message}")
+        for attempt in range(3):
+            try:
+                subprocess.run(['git', 'push'], check=True)
+                print(f"Successfully committed and pushed: {message}")
+                return
+            except subprocess.CalledProcessError:
+                if attempt < 2:
+                    print(f"Push failed, retrying ({attempt + 2}/3)...")
+                    import time
+                    time.sleep(5)
+        print("Push failed after 3 attempts. Will retry next run.")
     except subprocess.CalledProcessError as e:
         print(f"Git operation failed: {e}")
 
